@@ -22,21 +22,22 @@ Les contributions se font uniquement via **Git** (pull requests), et le site est
 ---
 
 ## ✍️ Comment contribuer ?
-Les contributions se font en ajoutant une entrée dans le fichier `articles.json`.
 
 ### 1. Forker le projet
 Créez une copie du dépôt sur votre compte GitHub.
 
 ### 2. Cloner votre fork
+```
 bash
 git clone https://github.com/votre-compte/feed-n-tech.git
 cd feed-n-tech
+```
 
 ### 3. Créer une branche
-git checkout -b ajout-<nom_de_votre_article>
+`git checkout -b ajout-<nom_de_votre_article>`
 
 ### 4. Ajouter votre contribution
-modifier le fichier articles.json et ajoutez une nouvelle entrée à la fin de la liste, exemple :
+modifier le fichier `articles.json` et ajoutez une nouvelle entrée à la fin de la liste, exemple :
 ```
 {
   "date": "2025-10-01",
