@@ -1,4 +1,4 @@
-# 📡 Feed-n-Tech
+# Feed-n-Tech
 
 Un site communautaire destiné aux passionnés et professionnels de l'infrastructure basé sur les retours d'utilisations.
 Le but est de partager des retours d'expérience et guides techniques sous forme de contributions Git. 
@@ -6,7 +6,7 @@ Les contributions se font uniquement via **Git** (pull requests), et le site est
 
 ---
 
-## 🚀 Objectifs
+## Objectifs
 
 - Favoriser le partage asynchrone de connaissances
 - Proposer un contenu validé par la communauté
@@ -14,14 +14,14 @@ Les contributions se font uniquement via **Git** (pull requests), et le site est
 
 ---
 
-## 📑 Exemples de contributions
+## Exemples de contributions
 - Un article sur "Utilisation du terminal CLI"
 - Un guide "Mettre en place un service"
 - Retour d'expérience "Facilité de création d'utilisateur Ubuntu"
 
 ---
 
-## ✍️ Comment contribuer ?
+## Comment contribuer ?
 
 ### 1. Forker le projet
 Créez une copie du dépôt sur votre compte GitHub.
