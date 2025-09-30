@@ -59,6 +59,10 @@ modifier le fichier `articles.json` et ajoutez une nouvelle entrée à la fin de
 }
 ```
 
+### 5. Github Actions
+
+`https://docs.github.com/en/actions/get-started/quickstart`
+
 
 ---
 
