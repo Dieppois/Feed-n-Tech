@@ -37,13 +37,15 @@ git checkout -b ajout-<nom_de_votre_article>
 
 ### 4. Ajouter votre contribution
 modifier le fichier articles.json et ajoutez une nouvelle entrée à la fin de la liste, exemple :
-`{
+```
+{
   "date": "2025-10-01",
   "author": "Votre Nom",
   "article_title": "Titre de l’article que vous commentez",
   "opinion": "Votre avis ou commentaire sur l’article, en quelques phrases.",
   "tags": ["tech", "avis", "opensource"]
-}`
+}
+```
 
 
 ---
