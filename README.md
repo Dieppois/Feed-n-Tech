@@ -51,7 +51,7 @@ modifier le fichier `articles.json` et ajoutez une nouvelle entrée à la fin de
 
 ---
 
-## 🔱 Crédits
+## Crédits
 - Rémi L.
 - Sasha CL.
 - Edouard D.
