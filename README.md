@@ -32,7 +32,8 @@ bash
 git clone https://github.com/votre-compte/feed-n-tech.git
 cd feed-n-tech
 
-
+### 3. Créer une branche
+git checkout -b ajout-<nom_de_votre_article>
 
 ---
 
