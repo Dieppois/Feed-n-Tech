@@ -51,11 +51,11 @@ cd feed-n-tech
 modifier le fichier `articles.json` et ajoutez une nouvelle entrée à la fin de la liste, exemple :
 ```
 {
-  "date": "2025-10-01",
-  "author": "Votre Nom",
-  "article_title": "Titre de l’article que vous commentez",
-  "opinion": "Votre avis ou commentaire sur l’article, en quelques phrases.",
-  "tags": ["tech", "avis", "opensource"]
+  "title": "Installer Debian sur un serveur",
+  "author": "Rémi L.",
+  "date": "2025-09-30",
+  "tags": ["linux", "installation", "debian"],
+  "content": "Mon retour d’expérience sur l’installation de Debian 12 sur un serveur maison..."
 }
 ```
 
