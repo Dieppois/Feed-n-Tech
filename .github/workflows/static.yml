@@ -1,0 +1,95 @@
+name: Deploy Markdown as HTML to GitHub Pages
+
+on:
+  push:
+    branches: ["master"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y pandoc
+
+      - name: Prepare site directory and convert articles
+        run: |
+          set -e
+          mkdir -p site
+          mkdir -p site/articles
+
+          # Boucle sur chaque markdown dans articles/
+          for md in $(find articles -name '*.md' | sort); do
+            slug=$(basename "$md" .md)
+            # Lire le title depuis le frontmatter (ou fallback au nom de fichier)
+            title=$(sed -n '1,20p' "$md" | sed -n 's/^title:[[:space:]]*//Ip' | sed 's/^["'\'']//;s/["'\'']$//')
+            if [ -z "$title" ]; then
+              title="$slug"
+            fi
+
+            pandoc "$md" \
+              --from markdown \
+              --template=templates/page.html \
+              --metadata title="$title" \
+              --output "site/articles/${slug}.html"
+          done
+
+          # Générer un index.md dynamique listant les articles (trié par date si date fournie)
+          echo "# Accueil" > /tmp/generated_index.md
+          echo "" >> /tmp/generated_index.md
+          echo "Voici la liste des articles :" >> /tmp/generated_index.md
+          echo "" >> /tmp/generated_index.md
+          
+          # Pour chaque fichier, récupérer title et date puis produire une ligne de liste
+          find articles -name '*.md' | while read mdfile; do
+            slug=$(basename "$mdfile" .md)
+            title=$(sed -n '1,20p' "$mdfile" | sed -n 's/^title:[[:space:]]*//Ip' | sed 's/^["'\'']//;s/["'\'']$//')
+            date=$(sed -n '1,20p' "$mdfile" | sed -n 's/^date:[[:space:]]*//Ip' | sed 's/^["'\'']//;s/["'\'']$//')
+            if [ -z "$title" ]; then title="$slug"; fi
+            if [ -z "$date" ]; then
+              echo "- [$title](/articles/${slug}.html)" >> /tmp/generated_index.md
+            else
+              echo "- [$title](/articles/${slug}.html) — $date" >> /tmp/generated_index.md
+            fi
+          done
+
+          # Convertir index.md généré en HTML avec le template
+          pandoc /tmp/generated_index.md \
+            --from markdown \
+            --template=templates/page.html \
+            --metadata title="Accueil" \
+            --output site/index.html
+
+          # Copier les ressources statiques
+          if [ -d static ]; then
+            cp -r static site/static
+          fi
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'site'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
