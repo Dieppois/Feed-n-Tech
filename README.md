@@ -41,10 +41,7 @@ git clone https://github.com/votre-compte/feed-n-tech.git
 cd feed-n-tech
 ```
 
-### 3. Créer une branche
-`git checkout -b ajout-<nom_de_votre_article>`
-
-### 4. Ajouter votre contribution
+### 3. Ajouter votre contribution
 modifier le fichier `articles.mb` et ajoutez une nouvelle entrée à la fin de la liste, exemple :
 ```
 
@@ -54,7 +51,7 @@ modifier le fichier `articles.mb` et ajoutez une nouvelle entrée à la fin de l
   content : Mon retour d’expérience sur l’installation de Debian 12 sur un serveur maison...
 ```
 
-### 5. Github Actions
+### 4. Github Actions
 
 `https://docs.github.com/en/actions/get-started/quickstart`
 
