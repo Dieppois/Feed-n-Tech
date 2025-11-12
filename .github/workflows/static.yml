@@ -25,10 +25,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Pandoc
+      - name: Install Pandoc and csplit
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y pandoc csplit
+          sudo apt-get install -y pandoc coreutils
 
       - name: Build site from CONTRIBUTING.md
         run: |
@@ -36,17 +36,12 @@ jobs:
           mkdir -p site/articles
 
           echo "=== Découpage de CONTRIBUTING.md en articles ==="
-          # Supprime d'éventuels anciens fichiers temporaires
           rm -f xx* 
-          # Découpe par séparateur "---"
           csplit -s CONTRIBUTING.md '/^---$/' '{*}'
 
-          # Boucle sur chaque article découpé
           for f in xx*; do
-            # Récupère le titre et slug
             title=$(head -1 "$f" | sed 's/^# //')
             slug=$(echo "$title" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
-            # Récupère la date
             date=$(grep "^### Date" "$f" | sed 's/^### Date : //')
 
             echo "→ Conversion : $title → site/articles/${slug}.html"
@@ -66,7 +61,6 @@ jobs:
           echo "## Liste des articles" >> /tmp/index.md
           echo "" >> /tmp/index.md
 
-          # Crée la liste des articles pour l'index
           for html in site/articles/*.html; do
             filename=$(basename "$html" .html)
             title=$(grep "<h1>" "$html" | sed 's/<[^>]*>//g')
@@ -74,7 +68,6 @@ jobs:
             echo "- [$title](/articles/${filename}.html) — $date" >> /tmp/index.md
           done
 
-          # Convertit l'index en HTML
           pandoc /tmp/index.md \
             --from markdown \
             --to html5 \
