@@ -15,3 +15,11 @@ Mon retour d’expérience sur l’installation de Debian 12 sur un serveur mais
 Guide rapide sur l’utilisation du terminal CLI pour gérer les utilisateurs et les permissions sur Ubuntu 22.04. Quelques commandes pratiques et exemples concrets.
 
 ---
+
+# Article 3
+### Title : Lest run some VMs
+### Date : 2025-11-12
+### Tags : "cli, guide, ubuntu"
+Can we run some VMs on Samsung fridges ?
+
+---
