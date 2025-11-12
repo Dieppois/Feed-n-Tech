@@ -1,28 +1,20 @@
-# Simple workflow for deploying static content to GitHub Pages
-name: Deploy static content to Pages
+name: Deploy Markdown as HTML to GitHub Pages
 
 on:
-  # Runs on pushes targeting the default branch
   push:
     branches: ["master"]
-
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
 jobs:
-  # Single deploy job since we're just deploying
   deploy:
     environment:
       name: github-pages
@@ -31,18 +23,73 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Install Pandoc
+
+      - name: Install dependencies
         run: |
-          sudo apt update -y
-          sudo apt install -y pandoc
+          sudo apt-get update -y
+          sudo apt-get install -y pandoc
+
+      - name: Prepare site directory and convert articles
+        run: |
+          set -e
+          mkdir -p site
+          mkdir -p site/articles
+
+          # Boucle sur chaque markdown dans articles/
+          for md in $(find articles -name '*.md' | sort); do
+            slug=$(basename "$md" .md)
+            # Lire le title depuis le frontmatter (ou fallback au nom de fichier)
+            title=$(sed -n '1,20p' "$md" | sed -n 's/^title:[[:space:]]*//Ip' | sed 's/^["'\'']//;s/["'\'']$//')
+            if [ -z "$title" ]; then
+              title="$slug"
+            fi
+
+            pandoc "$md" \
+              --from markdown \
+              --template=templates/page.html \
+              --metadata title="$title" \
+              --output "site/articles/${slug}.html"
+          done
+
+          # Générer un index.md dynamique listant les articles (trié par date si date fournie)
+          echo "# Accueil" > /tmp/generated_index.md
+          echo "" >> /tmp/generated_index.md
+          echo "Voici la liste des articles :" >> /tmp/generated_index.md
+          echo "" >> /tmp/generated_index.md
+          
+          # Pour chaque fichier, récupérer title et date puis produire une ligne de liste
+          find articles -name '*.md' | while read mdfile; do
+            slug=$(basename "$mdfile" .md)
+            title=$(sed -n '1,20p' "$mdfile" | sed -n 's/^title:[[:space:]]*//Ip' | sed 's/^["'\'']//;s/["'\'']$//')
+            date=$(sed -n '1,20p' "$mdfile" | sed -n 's/^date:[[:space:]]*//Ip' | sed 's/^["'\'']//;s/["'\'']$//')
+            if [ -z "$title" ]; then title="$slug"; fi
+            if [ -z "$date" ]; then
+              echo "- [$title](/articles/${slug}.html)" >> /tmp/generated_index.md
+            else
+              echo "- [$title](/articles/${slug}.html) — $date" >> /tmp/generated_index.md
+            fi
+          done
+
+          # Convertir index.md généré en HTML avec le template
+          pandoc /tmp/generated_index.md \
+            --from markdown \
+            --template=templates/page.html \
+            --metadata title="Accueil" \
+            --output site/index.html
+
+          # Copier les ressources statiques
+          if [ -d static ]; then
+            cp -r static site/static
+          fi
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload entire repository
-          path: '.'
+          path: 'site'
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-        
