@@ -25,7 +25,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Pandoc and csplit
+      - name: Install dependencies
         run: |
           sudo apt-get update -y
           sudo apt-get install -y pandoc coreutils
@@ -34,21 +34,28 @@ jobs:
         run: |
           set -e
 
-          # Nettoyage ancien build
+          # Nettoyer ancien build
           rm -rf site xx*
           mkdir -p site/articles
 
           echo "=== Découpage de CONTRIBUTING.md en articles ==="
           csplit -s CONTRIBUTING.md '/^---$/' '{*}'
 
-          echo "=== Génération des pages articles ==="
+          declare -a articles=()
+
+          # Génération des pages articles
           for f in xx*; do
-            # Titre et slug
             title=$(head -1 "$f" | sed 's/^# //')
             slug=$(echo "$title" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
             date=$(grep "^### Date" "$f" | sed 's/^### Date : //')
 
-            echo "→ $title → site/articles/${slug}.html"
+            # Vérification des métadonnées
+            if [ -z "$title" ] || [ -z "$date" ]; then
+              echo "⚠️ Article ignoré (titre ou date manquant) : $f"
+              continue
+            fi
+
+            echo "→ Génération : $title → site/articles/${slug}.html"
             pandoc "$f" \
               --from markdown \
               --to html5 \
@@ -57,23 +64,27 @@ jobs:
               --metadata title="$title" \
               --metadata date="$date" \
               --output "site/articles/${slug}.html"
+
+            # Ajouter à la liste pour l'index
+            articles+=("$date;$title;$slug")
           done
 
-          echo "=== Génération de l'index ==="
+          echo "=== Génération de l'index.html ==="
+          # Tri par date descendante
+          IFS=$'\n' sorted=($(sort -r <<<"${articles[*]}"))
+          unset IFS
+
           echo "# Accueil" > /tmp/index.md
           echo "" >> /tmp/index.md
           echo "## Liste des articles" >> /tmp/index.md
           echo "" >> /tmp/index.md
 
-          # Boucle sur les fichiers temporaires pour créer l'index
-          for f in xx*; do
-            title=$(head -1 "$f" | sed 's/^# //')
-            slug=$(echo "$title" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
-            date=$(grep "^### Date" "$f" | sed 's/^### Date : //')
-            echo "- [$title](/articles/${slug}.html) — $date" >> /tmp/index.md
+          for line in "${sorted[@]}"; do
+            IFS=';' read -r date title slug <<< "$line"
+            echo "- [$title](/Feed-n-Tech/articles/${slug}.html) — $date" >> /tmp/index.md
           done
 
-          # Conversion de l'index en HTML
+          # Conversion de l'index
           pandoc /tmp/index.md \
             --from markdown \
             --to html5 \
