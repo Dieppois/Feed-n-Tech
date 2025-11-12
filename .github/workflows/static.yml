@@ -46,15 +46,17 @@ jobs:
           # Génération des pages articles
           for f in xx*; do
             title=$(head -1 "$f" | sed 's/^# //')
-            slug=$(echo "$title" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
             date=$(grep "^### Date" "$f" | sed 's/^### Date : //')
-
-            # Vérification des métadonnées
+          
+            # Si titre ou date vide, supprimer le fichier temporaire et passer au suivant
             if [ -z "$title" ] || [ -z "$date" ]; then
               echo "⚠️ Article ignoré (titre ou date manquant) : $f"
+              rm -f "$f"        # <-- supprimer le HTML inutile
               continue
             fi
-
+          
+            slug=$(echo "$title" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+          
             echo "→ Génération : $title → site/articles/${slug}.html"
             pandoc "$f" \
               --from markdown \
@@ -64,10 +66,10 @@ jobs:
               --metadata title="$title" \
               --metadata date="$date" \
               --output "site/articles/${slug}.html"
-
-            # Ajouter à la liste pour l'index
+          
             articles+=("$date;$title;$slug")
           done
+
 
           echo "=== Génération de l'index.html ==="
           # Tri par date descendante
