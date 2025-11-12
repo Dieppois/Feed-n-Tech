@@ -27,7 +27,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y pandoc csplit
+          sudo apt-get install -y pandoc coreutils
 
       - name: Build site from CONTRIBUTING.md
         run: |
