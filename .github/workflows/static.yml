@@ -1,4 +1,4 @@
-name: Deploy Markdown as HTML to GitHub Pages
+name: Build and Deploy Feed-n-Tech Blog
 
 on:
   push:
@@ -15,11 +15,14 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  # ------------------------
+  # 1️⃣ BUILD & ACTIVATE
+  # ------------------------
+  build:
+    name: Build site
     runs-on: ubuntu-latest
+    outputs:
+      site-path: ${{ steps.output_path.outputs.path }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,10 +33,9 @@ jobs:
           sudo apt-get install -y pandoc coreutils
 
       - name: Build site from CONTRIBUTING.md
+        id: build_site
         run: |
           set -e
-
-          # Nettoyer ancien build
           rm -rf site xx*
           mkdir -p site/articles
 
@@ -42,7 +44,6 @@ jobs:
 
           declare -a articles=()
 
-          # Génération des pages articles
           for f in xx*; do
             title=$(head -1 "$f" | sed 's/^# //')
             date=$(grep "^### Date" "$f" | sed 's/^### Date : //')
@@ -54,8 +55,8 @@ jobs:
             fi
 
             slug=$(echo "$title" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
-
             echo "→ Génération : $title → site/articles/${slug}.html"
+
             pandoc "$f" \
               --from markdown \
               --to html5 \
@@ -94,14 +95,52 @@ jobs:
           find site -type f -print
           du -sh site
 
+      - name: Save output path
+        id: output_path
+        run: echo "path=site" >> $GITHUB_OUTPUT
+
+  # ------------------------
+  # 2️⃣ DEPLOYMENT
+  # ------------------------
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'site'
+          path: ${{ needs.build.outputs.site-path }}
 
-      - name: Deploy to GitHub Pages
+      - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
+
+  # ------------------------
+  # 3️⃣ SMOKE TEST
+  # ------------------------
+  smoke-test:
+    name: Smoke test deployment
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for site to be available
+        run: |
+          echo "⏳ Attente du déploiement de la page..."
+          sleep 10
+      - name: Test site availability
+        run: |
+          URL="https://dieppois.github.io/Feed-n-Tech/"
+          echo "🔍 Vérification de $URL"
+          STATUS=$(curl -o /dev/null -s -w "%{http_code}" "$URL")
+          if [ "$STATUS" -ne 200 ]; then
+            echo "❌ Site non accessible (HTTP $STATUS)"
+            exit 1
+          fi
+          echo "✅ Site accessible avec succès (HTTP $STATUS)"
