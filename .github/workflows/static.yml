@@ -20,15 +20,14 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Install dependencies
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y pandoc coreutils
+          sudo apt-get install -y pandoc csplit
 
       - name: Build site from CONTRIBUTING.md
         run: |
@@ -47,16 +46,15 @@ jobs:
           for f in xx*; do
             title=$(head -1 "$f" | sed 's/^# //')
             date=$(grep "^### Date" "$f" | sed 's/^### Date : //')
-          
-            # Si titre ou date vide, supprimer le fichier temporaire et passer au suivant
+
             if [ -z "$title" ] || [ -z "$date" ]; then
               echo "⚠️ Article ignoré (titre ou date manquant) : $f"
-              rm -f "$f"        # <-- supprimer le HTML inutile
+              rm -f "$f"
               continue
             fi
-          
+
             slug=$(echo "$title" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
-          
+
             echo "→ Génération : $title → site/articles/${slug}.html"
             pandoc "$f" \
               --from markdown \
@@ -66,13 +64,11 @@ jobs:
               --metadata title="$title" \
               --metadata date="$date" \
               --output "site/articles/${slug}.html"
-          
+
             articles+=("$date;$title;$slug")
           done
 
-
           echo "=== Génération de l'index.html ==="
-          # Tri par date descendante
           IFS=$'\n' sorted=($(sort -r <<<"${articles[*]}"))
           unset IFS
 
@@ -86,7 +82,6 @@ jobs:
             echo "- [$title](/Feed-n-Tech/articles/${slug}.html) — $date" >> /tmp/index.md
           done
 
-          # Conversion de l'index
           pandoc /tmp/index.md \
             --from markdown \
             --to html5 \
