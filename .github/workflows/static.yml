@@ -33,18 +33,22 @@ jobs:
       - name: Build site from CONTRIBUTING.md
         run: |
           set -e
+
+          # Nettoyage ancien build
+          rm -rf site xx*
           mkdir -p site/articles
 
           echo "=== Découpage de CONTRIBUTING.md en articles ==="
-          rm -f xx* 
           csplit -s CONTRIBUTING.md '/^---$/' '{*}'
 
+          echo "=== Génération des pages articles ==="
           for f in xx*; do
+            # Titre et slug
             title=$(head -1 "$f" | sed 's/^# //')
             slug=$(echo "$title" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
             date=$(grep "^### Date" "$f" | sed 's/^### Date : //')
 
-            echo "→ Conversion : $title → site/articles/${slug}.html"
+            echo "→ $title → site/articles/${slug}.html"
             pandoc "$f" \
               --from markdown \
               --to html5 \
@@ -61,13 +65,15 @@ jobs:
           echo "## Liste des articles" >> /tmp/index.md
           echo "" >> /tmp/index.md
 
-          for html in site/articles/*.html; do
-            filename=$(basename "$html" .html)
-            title=$(grep "<h1>" "$html" | sed 's/<[^>]*>//g')
-            date=$(grep "<em>" "$html" | sed 's/<[^>]*>//g')
-            echo "- [$title](/articles/${filename}.html) — $date" >> /tmp/index.md
+          # Boucle sur les fichiers temporaires pour créer l'index
+          for f in xx*; do
+            title=$(head -1 "$f" | sed 's/^# //')
+            slug=$(echo "$title" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+            date=$(grep "^### Date" "$f" | sed 's/^### Date : //')
+            echo "- [$title](/articles/${slug}.html) — $date" >> /tmp/index.md
           done
 
+          # Conversion de l'index en HTML
           pandoc /tmp/index.md \
             --from markdown \
             --to html5 \
