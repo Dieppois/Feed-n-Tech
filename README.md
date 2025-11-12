@@ -19,15 +19,12 @@ Les contributions se font uniquement via **Git** (pull requests), et le site est
 - Un guide "Mettre en place un service"
 - Retour d'expérience "Facilité de création d'utilisateur Ubuntu"
 
-## Format JSON à respecter
+## Format Markdown à respecter
 ```
-{
-  "title": "Installer Debian sur un serveur",
-  "author": "Rémi L.",
-  "date": "2025-09-30",
-  "tags": ["linux", "installation", "debian"],
-  "content": "Mon retour d’expérience sur l’installation de Debian 12 sur un serveur maison..."
-}
+  title : # Titre article
+  date : ### Date : 2025-09-30
+  tags : ### Tags : "linux", "installation", "debian"
+  content : Mon retour d’expérience sur l’installation de Debian 12 sur un serveur maison...
 ```
 
 ---
@@ -44,22 +41,17 @@ git clone https://github.com/votre-compte/feed-n-tech.git
 cd feed-n-tech
 ```
 
-### 3. Créer une branche
-`git checkout -b ajout-<nom_de_votre_article>`
-
-### 4. Ajouter votre contribution
-modifier le fichier `articles.json` et ajoutez une nouvelle entrée à la fin de la liste, exemple :
-```
-{
-  "title": "Installer Debian sur un serveur",
-  "author": "Rémi L.",
-  "date": "2025-09-30",
-  "tags": ["linux", "installation", "debian"],
-  "content": "Mon retour d’expérience sur l’installation de Debian 12 sur un serveur maison..."
-}
+### 3. Ajouter votre contribution
+modifier le fichier `articles.mb` et ajoutez une nouvelle entrée à la fin de la liste, exemple :
 ```
 
-### 5. Github Actions
+  title : # Titre article
+  date : ### Date : 2025-09-30
+  tags : ### Tags : "linux", "installation", "debian"
+  content : Mon retour d’expérience sur l’installation de Debian 12 sur un serveur maison...
+```
+
+### 4. Github Actions
 
 `https://docs.github.com/en/actions/get-started/quickstart`
 
