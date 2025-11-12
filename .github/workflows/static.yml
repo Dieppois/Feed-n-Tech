@@ -28,22 +28,29 @@ jobs:
       - name: Install Pandoc
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y pandoc
+          sudo apt-get install -y pandoc csplit
 
-      - name: Build static site
+      - name: Build site from CONTRIBUTING.md
         run: |
           set -e
           mkdir -p site/articles
 
-          echo "=== Conversion des fichiers Markdown en HTML ==="
-          for md in $(find articles -name '*.md' | sort); do
-            slug=$(basename "$md" .md)
-            title=$(sed -n '1,20p' "$md" | sed -n 's/^#\s*Titre\s*:\s*//Ip')
-            date=$(sed -n '1,20p' "$md" | sed -n 's/^###\s*Date\s*:\s*//Ip')
-            [ -z "$title" ] && title="$slug"
+          echo "=== Découpage de CONTRIBUTING.md en articles ==="
+          # Supprime d'éventuels anciens fichiers temporaires
+          rm -f xx* 
+          # Découpe par séparateur "---"
+          csplit -s CONTRIBUTING.md '/^---$/' '{*}'
 
-            echo "→ Conversion de $md en site/articles/${slug}.html (titre=$title)"
-            pandoc "$md" \
+          # Boucle sur chaque article découpé
+          for f in xx*; do
+            # Récupère le titre et slug
+            title=$(head -1 "$f" | sed 's/^# //')
+            slug=$(echo "$title" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+            # Récupère la date
+            date=$(grep "^### Date" "$f" | sed 's/^### Date : //')
+
+            echo "→ Conversion : $title → site/articles/${slug}.html"
+            pandoc "$f" \
               --from markdown \
               --to html5 \
               --standalone \
@@ -53,24 +60,21 @@ jobs:
               --output "site/articles/${slug}.html"
           done
 
-          echo "=== Génération de la page d'accueil ==="
+          echo "=== Génération de l'index ==="
           echo "# Accueil" > /tmp/index.md
           echo "" >> /tmp/index.md
           echo "## Liste des articles" >> /tmp/index.md
           echo "" >> /tmp/index.md
 
-          find articles -name '*.md' | while read mdfile; do
-            slug=$(basename "$mdfile" .md)
-            title=$(sed -n '1,20p' "$mdfile" | sed -n 's/^#\s*Titre\s*:\s*//Ip')
-            date=$(sed -n '1,20p' "$mdfile" | sed -n 's/^###\s*Date\s*:\s*//Ip')
-            [ -z "$title" ] && title="$slug"
-            if [ -z "$date" ]; then
-              echo "- [$title](/articles/${slug}.html)" >> /tmp/index.md
-            else
-              echo "- [$title](/articles/${slug}.html) — $date" >> /tmp/index.md
-            fi
+          # Crée la liste des articles pour l'index
+          for html in site/articles/*.html; do
+            filename=$(basename "$html" .html)
+            title=$(grep "<h1>" "$html" | sed 's/<[^>]*>//g')
+            date=$(grep "<em>" "$html" | sed 's/<[^>]*>//g')
+            echo "- [$title](/articles/${filename}.html) — $date" >> /tmp/index.md
           done
 
+          # Convertit l'index en HTML
           pandoc /tmp/index.md \
             --from markdown \
             --to html5 \
