@@ -19,15 +19,13 @@ Les contributions se font uniquement via **Git** (pull requests), et le site est
 - Un guide "Mettre en place un service"
 - Retour d'expérience "Facilité de création d'utilisateur Ubuntu"
 
-## Format JSON à respecter
+## Format Markdown à respecter
 ```
-{
-  "title": "Installer Debian sur un serveur",
-  "author": "Rémi L.",
-  "date": "2025-09-30",
-  "tags": ["linux", "installation", "debian"],
-  "content": "Mon retour d’expérience sur l’installation de Debian 12 sur un serveur maison..."
-}
+  title : # Titre article
+  author : ### Autheur : Rémi L.L
+  date : ### Date : 2025-09-30
+  tags : ### Tags : "linux", "installation", "debian"
+  content : Mon retour d’expérience sur l’installation de Debian 12 sur un serveur maison...
 ```
 
 ---
