@@ -22,7 +22,6 @@ Les contributions se font uniquement via **Git** (pull requests), et le site est
 ## Format Markdown à respecter
 ```
   title : # Titre article
-  author : ### Autheur : Rémi L.L
   date : ### Date : 2025-09-30
   tags : ### Tags : "linux", "installation", "debian"
   content : Mon retour d’expérience sur l’installation de Debian 12 sur un serveur maison...
@@ -46,15 +45,13 @@ cd feed-n-tech
 `git checkout -b ajout-<nom_de_votre_article>`
 
 ### 4. Ajouter votre contribution
-modifier le fichier `articles.json` et ajoutez une nouvelle entrée à la fin de la liste, exemple :
+modifier le fichier `articles.mb` et ajoutez une nouvelle entrée à la fin de la liste, exemple :
 ```
-{
-  "title": "Installer Debian sur un serveur",
-  "author": "Rémi L.",
-  "date": "2025-09-30",
-  "tags": ["linux", "installation", "debian"],
-  "content": "Mon retour d’expérience sur l’installation de Debian 12 sur un serveur maison..."
-}
+
+  title : # Titre article
+  date : ### Date : 2025-09-30
+  tags : ### Tags : "linux", "installation", "debian"
+  content : Mon retour d’expérience sur l’installation de Debian 12 sur un serveur maison...
 ```
 
 ### 5. Github Actions
