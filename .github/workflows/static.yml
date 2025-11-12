@@ -42,6 +42,14 @@ jobs:
         with:
           # Upload entire repository
           path: '.'
+      - name: GitHub Author
+        run: |
+          for f in content/*.md; do
+            author=$(git log -1 --pretty=format:'%an' -- "$f")
+            echo "---" > tmp && echo "author: $author" >> tmp && tail -n +2 "$f" >> tmp
+            mv tmp "$f"
+          done
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        
